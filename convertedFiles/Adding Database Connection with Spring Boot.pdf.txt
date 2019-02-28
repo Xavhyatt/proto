@@ -1,0 +1,576 @@
+
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 1
+ 
+ 
+  
+ 
+QA Consulting. 
+Adding a Database 
+Connection 
+SPRING BOOT 
+
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Prepared by 
+Dale Carr 
++447534789613 
+dale.carr@qa.com 
+ 
+ 
+
+ 
+ 
+ 
+Contents 
+Create Spring Boot application connecting to Database .............................. 1 
+Adding the database ................................................................................................................. 5 
+JPA Auditing ................................................................................................................................. 11 
+Exceptions .................................................................................................................................... 13 
+Creating the REST controller ................................................................................................... 18 
+Running it .................................................................................................................................... 24 
+Postman .................................................................................................................. 25 
+ 
+ 
+ 
+  
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 1
+ 
+Create Spring Boot application connecting to 
+Database 
+1  Download STS (Spring tool Suit) from eclipse marketplace. Similar tool-suites 
+exist for other IDE’s and you are welcome to do this instead but you are on 
+your own  You can also use Spring Initializer at http://start,spring.io 
+2  Switch to the Spring perspective 
+ 
+3  Select file > new > spring starter project 
+4  On the build wizard page enter the following details: 
+a. Name: {Name of your app} 
+b. Make sure it is a Maven project and set your versions of Maven and 
+Java 
+c. Packaging should be jar 
+d. Language should be java 
+e.  
+f. Group : {Group name} 
+g. Artifact : {Normally same as name} 
+h. Version : {Set your version} 
+i. Description : {Anything you want but make sure it communicates the 
+purpose of your app} 
+j. Package : {Normally group + Name} 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 2
+ 
+ 
+5  Select next 
+ 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 3
+ 
+ 
+6  Select the following dependencies 
+a. DevTools 
+b. JPA 
+c. MySQL 
+d. Web 
+ 
+ 
+7  Click finish 
+ 
+ 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 4
+ 
+8  Your package Explorer should look similar to the following: 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 5
+ 
+Adding the database 
+1  Add the following code to the application.properties file: 
+ 
+ 
+Spring Datasource -This is the connection to the database.  Set this as you would in the 
+JDBC 
+Hibernate properties  
+Dialect - this is set for MySQL version 5.  It makes the SQL tailored to the particular 
+instances you use 
+Hibernate ddl auto 
+There are 4 options 
+Create, Create-Drop, Validate, Update – When we define a data model it will create the 
+table we need in the database and map the fields we need to columns inside the table 
+If we change the model at all it will update the table to reflect these changes. 
+In this example we are going to use update but in a production environment we should 
+be using management tools to control this for us for safety reasons. 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 6
+ 
+2  Make a new class called SpringBootData
+ 
+We are going to make the following fields 
+ID  - primary key autoincrementing 
+Name – name of the person (NOTNULL) 
+Address – Where they live (NOTNULL) 
+Age – Current age (NULL) 
+Created - Date when added Time when the user was added 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 7
+ 
+ 
+3  Create a new package for our model
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 8
+ 
+4  And then create a new class inside to hold the model.  I have called mine 
+mySpringBootDataModel
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 9
+ 
+5  Add the following code into the class
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 10
+ 
+ 
+ 
+All your domain models must be annotated with @Entity annotation. It is used to 
+mark the class as a persistent Java class. 
+@Table annotation is used to provide the details of the table that this entity will be 
+mapped to. 
+@Id annotation is used to define the primary key. 
+@GeneratedValue annotation is used to define the primary key generation 
+strategy. In the above case, we have declared the primary key to be an Auto 
+Increment field. 
+@NotBlank annotation is used to validate that the annotated field is not null or 
+empty. 
+@Column annotation is used to define the properties of the column that will be 
+mapped to the annotated field. You can define several properties like name, 
+length, nullable, updateable etc. 
+By default, a field named createdAt is mapped to a column named created_at in 
+the database table. i.e. all camel cases are replaced with underscores. 
+If you want to map the field to a different column, you can specify it using - 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 11
+ 
+@Column(name = "created_on") 
+private String createdAt; 
+@Temporal annotation is used with java.util.Date and java.util.Calendar classes. It 
+converts the date and time values from Java Object to compatible database type 
+and vice versa. 
+@JsonIgnoreProperties annotation is a Jackson annotation. Spring Boot uses 
+Jackson for Serializing and Deserializing Java objects to and from JSON. 
+This annotation is used because we don’t want the clients of the rest api to supply 
+the createdAtand updatedAt values. If they supply these values then we’ll simply 
+ignore them. However, we’ll include these values in the JSON response. 
+ 
+JPA Auditing 
+What we now want to look at is our auto date fields, createdDate and 
+LastModified. 
+ 
+We want these to populate whenever we create or update an entity 
+Now we have already told the code inside the data model that we want to 
+do this by adding the @EntityListeners annotation into the model class 
+ 
+We now need to enable it in the main application using the 
+@EnableJpaAuditing annotation 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 12
+ 
+1   Add the following imports: 
+ 
+2  We now want to create a repository to access data from the database 
+We will be using Springs Data JPA which will define all the basic crud operations for 
+us. 
+So we create a repository package in the project 
+We are then going to create a new interface called personRepository and extend 
+JpaRepository giving it the keyValue pair of the same type as the model we just 
+created and the type of the ID 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 13
+ 
+ 
+We should now be able to use a range of methods to control our data 
+Exceptions 
+When ever we do a search for an ID that isn’t in the database we will get a 
+ResourceNotFoundException and we need to bind this to the response to handle it 
+correctly 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 14
+ 
+1  Make a new package for the project exceptions
+ 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 15
+ 
+2  Create the ResourceNotFoundException class which extends runtime 
+exception. 
+ 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 16
+ 
+3  Inside the class add the following: 
+ 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 17
+ 
+4  And finally we want to add the @ResponseStatus annotation to allow us to 
+bind the exception to a HTTP response code and import the correct imports: 
+ 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 18
+ 
+Creating the REST controller 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 19
+ 
+1  Add a package for the controller and create a controller class: 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 20
+ 
+ 
+And now to create each of the methods 
+ 
+2  Create a person POST /api/person 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 21
+ 
+errors due to missing imports
+ 
+The @RequestBody annotation is used to bind the request body with a method 
+parameter. 
+The @Valid annotation makes sure that the request body is valid. Remember, we 
+had marked Note’s title and content with @NotBlank annotation in 
+the Note model? 
+If the request body doesn’t have a title or a content, then spring will return a 400 
+BadRequest error to the client. 
+3  Method to get a single person GET /api/person/{personID} 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 22
+ 
+Which needs even more imports: 
+  
+The @PathVariable annotation, as the name suggests, is used to bind a path 
+variable with a method parameter. 
+In the above method, we are throwing a ResourceNotFoundException whenever 
+a Note with the given id is not found. 
+This will cause Spring Boot to return a 404 Not Found error to the client 
+(Remember, we had added a @ResponseStatus(value = 
+HttpStatus.NOT_FOUND) annotation to the ResourceNotFoundExceptionclass). 
+ 
+4  Getting all people out of the database 
+ 
+ 
+This time we should only need to import list as we are reusing the annotations we 
+have used earlier(Make sure you import java.util.List) 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 23
+ 
+5  Update a person (PUT /api/person/{personID}
+ 
+Add the imports for PutMapping 
+ 
+6  remove a person (DELETE /api/person/{personID}
+ 
+And add the appropriate imports of course 
+ 
+7  Imports should now look like so 
+ 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 24
+ 
+Running it 
+1  Go back to the application and run as a springboot app. You should get some 
+text to the console including some spring ascii art
+ 
+ 
+ 
+ 
+2  Now lets test this using PostmanTomcat should be running on localhost 8080 
+
+Database Connection with Spring Boot 
+ 
+    
+ 
+ 
+  
+ 
+Tuesday, 28 August 2018
+ 
+| 25
+ 
+Postman 
+ 
+Remember to select JSON as the type and raw 
+Match your JSON to the data format you have put in (Remember you don’t need to 
+add the dates as they are done automatically) 
+1  run each of your methods using postman and screen-shot both postman and 
+the changes to your database  
+ 
