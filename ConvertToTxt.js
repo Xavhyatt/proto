@@ -1,6 +1,12 @@
 var watch = require('node-watch');
 var folder = '/Users/Admin/Desktop/BackEnd/projectBack/upload/';
 var folder2 = '/Users/Admin/Desktop/BackEnd/projectBack/convertedFiles/';
+const fs = require("fs");
+
+if (!fs.existsSync(folder2)){
+    console.log('Folder Created!')
+    fs.mkdirSync(folder2);
+}
 watch(folder, { recursive: true }, function (evt, name) {
     console.log('%s changed.', name);
     let filename = name.substring(folder.length);
@@ -50,6 +56,14 @@ function docxToText(name,txtfile) {
             })
         })
         .done();
+    // let fname = name.substring(folder.length);
+    // let newloc = folder2 + fname;
+
+    // fs.rename(name, newloc,function(err){
+    //     if(err) throw err;
+    //     console.log("Docx file moved");
+    // })
+
 }
 
 function pfdToTxt(name, txtfile) {
@@ -73,11 +87,30 @@ function pfdToTxt(name, txtfile) {
         // console.log(data.version);
         // // PDF text
         // console.log("content: " + data.text);
-        fs.writeFile(txtfile, data.text, function (err) {
-            if (err) throw err;
-            console.log("PDF Converted !");
-        })
+        // let filename = name.substring(folder.length);
+  
+        // let change = folder + filename + ".txt";
+        createDocx(txtfile,data.text);
+        // fs.writeFile(change, data.text, function (err) {
+        //     if (err) throw err;
+        //     console.log("PDF Converted !");
+        //      createDocx(txtfile,data.text);
+        //      fs.unlinkSync(name)
+        // })
     });
+   // let fs = require('fs'),
+//     PDFParser = require("pdf2json");
+
+// let pdfParser = new PDFParser();
+
+// pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError) );
+// pdfParser.on("pdfParser_dataReady", pdfData => {
+//     fs.writeFile(txtfile, JSON.stringify(pdfData));
+// });
+
+// pdfParser.loadPDF(name);
+
+
 }
 
 
@@ -94,3 +127,18 @@ function xlsxToTxt(name, txtfile) {
     })
 }
 
+function createDocx(txtfile,text){
+    let docx = require('docx');
+
+    let doc = new docx.Document();
+
+    var paragraph = new docx.Paragraph();
+    paragraph.addRun(new docx.TextRun(text));
+    doc.addParagraph(paragraph);
+
+
+    let packer = new docx.Packer();
+    packer.toBuffer(doc).then((buffer) => {
+    fs.writeFileSync((txtfile.substring(0,txtfile.length-4)+".docx"), buffer)
+    })
+};

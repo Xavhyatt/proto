@@ -1,41 +1,55 @@
 var watch = require('node-watch');
 const fs = require("fs");
 const fetch = require('node-fetch');
-let buzzwordAPI = "http://192.168.1.114:9123/keywords/getall";
+const PDFDocument = require('pdfkit');
+let buzzwordAPI = "http://52.142.150.170:3000/keywords/getall";
 
 
 
-const request = async (data,name) => {
-    fetch(buzzwordAPI)
-    .then(response => response.text())
-    .then(words => 
+// const request = async (data,name) => {
+//     fetch(buzzwordAPI)
+//     .then(response => response.text())
+//     .then(words => 
         
-        scanText(data,words,name))
-        .catch((error) => {
-            console.log(error);
-        });
+//         scanText(data,words,name))
+//         .catch((error) => {
+//             console.log(error);
+//         });
         
-}
+// }
 
 var folder = './convertedFiles/';
+let suffixrmv;
 watch(folder, { recursive: true }, function (evt, name) {
     if (evt == 'update') {
+         if(name.endsWith(".txt")){
+        suffixrmv = 4; 
+        }
+        if(name.endsWith(".docx")){
+            suffixrmv = 5;
+        }
+        
     fs.readFile(name, 'utf8', function(err, data) {
         if (err) throw err;
         console.log('OK: ' + name);
-      
+    
         let filename = name.substring(folder.length-2,name.length-4);
       
-        request(data, filename);
+        //request(data, filename);
+        let words = ["lodash"];
+         scanText(data,words,name)
+         fs.unlinkSync(name);
+    
         
     })
-}
 
+    }
 })
 
 function scanText(text, buzzwords, name){
 
     let taglessText = text.replace(/<(?:.|\n)*?>/gm, ' ');
+
 
     let wordArray = taglessText.split(" ");
     let wordcount = 0;
@@ -44,8 +58,9 @@ function scanText(text, buzzwords, name){
          wordcount ++; 
         }
     })
+  
     let lowerText = taglessText.toLowerCase();
-    var wordcnt = lowerText.replace(/[^\w\s]/g, "").split(/\s+/).reduce(function(map, word){
+    var wordcnt = lowerText.replace(/[^\w\s]/g, " ").split(/\s+/).reduce(function(map, word){
         map[word] = (map[word]||0)+1;
         return map;
     }, Object.create(null));
@@ -53,7 +68,7 @@ function scanText(text, buzzwords, name){
     let definite =[];
     let maybe = [];
     let keys = Object.keys(wordcnt);
-    buzzwords = JSON.parse(buzzwords);
+    // buzzwords = JSON.parse(buzzwords);
     
 
     buzzwords.forEach(function(element){
@@ -91,18 +106,49 @@ let maybeRes = {"Partial Matches" : maybe};
   let json = {"nameOfFile" : name,
   "wordCount" : wordcount, "numberOfThreatWordsFound": definite.length, "exactMatches": definite,
   "partialMatches":maybe};
-  console.log(json);
   let dir = __dirname +'/reports';
   if (!fs.existsSync(dir)){
       console.log('Folder Created!')
       fs.mkdirSync(dir);
   }
   let fileloc = './reports/' + name.substring(0,name.length-4) + ".json";
-
+console.log(json);
  
-   fs.writeFile(fileloc, JSON.stringify(json), function (err) {
-    if (err) throw err;
-    console.log("json created");
-})
+//    fs.writeFile(fileloc, JSON.stringify(json), function (err) {
+//     if (err) throw err;
+//     console.log("json created");
+// })
+// const doc = new PDFDocument;
+// var fontkit = require('fontkit');
+
+// doc.pipe(fs.createWriteStream('./reports/output.pdf'));
+
+// doc.font('fonts/PalatinoBold.ttf')
+//    .fontSize(25)
+//    .text(name + " Report", 100, 100);
+
+//    doc.font('fonts/PalatinoBold.ttf')
+//    .fontSize(15)
+//    .text('Scan Date: ', 100, 160);
+
+//    doc.font('fonts/PalatinoBold.ttf')
+//    .fontSize(15)
+//    .text('Number of Threat Words Found: ' + definite.length , 100, 200);
+
+//    doc.font('fonts/PalatinoBold.ttf')
+//    .fontSize(15)
+//    .text('Exact Matches: ' + JSON.stringify(definite) , 100, 240);
+
+//    doc.font('fonts/PalatinoBold.ttf')
+//    .fontSize(15)
+//    .text('Partial Matches: ' + JSON.stringify(maybe) , 100, 280);
+
+    
+
+//    doc.end();
 }
+
+
+
+
 
