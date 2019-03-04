@@ -37,7 +37,7 @@ watch(folder, { recursive: true }, function (evt, name) {
       
         //request(data, filename);
         let words = ["lodash"];
-         scanText(data,words,name)
+         scanText(data,words,filename)
          fs.unlinkSync(name);
     
         
@@ -47,6 +47,9 @@ watch(folder, { recursive: true }, function (evt, name) {
 })
 
 function scanText(text, buzzwords, name){
+    let date = require('date-and-time');
+    let now = new Date();
+    date.format(now, 'DD/MM/YYYY HH:mm:ss');
 
     let taglessText = text.replace(/<(?:.|\n)*?>/gm, ' ');
 
@@ -103,7 +106,7 @@ let maybeRes = {"Partial Matches" : maybe};
 //   console.log("Number of Threat words found: " + definite.length);
 //   console.log(definiteRes);
 //   console.log(maybeRes);
-  let json = {"nameOfFile" : name,
+  let json = {"nameOfFile" : name, "TimeOfScan" : now,
   "wordCount" : wordcount, "numberOfThreatWordsFound": definite.length, "exactMatches": definite,
   "partialMatches":maybe};
   let dir = __dirname +'/reports';
@@ -111,41 +114,50 @@ let maybeRes = {"Partial Matches" : maybe};
       console.log('Folder Created!')
       fs.mkdirSync(dir);
   }
-  let fileloc = './reports/' + name.substring(0,name.length-4) + ".json";
+  let fileloc = './reports/' + name.substring(folder,name.length-suffixrmv) + ".json";
+
+
 console.log(json);
  
-//    fs.writeFile(fileloc, JSON.stringify(json), function (err) {
-//     if (err) throw err;
-//     console.log("json created");
-// })
-// const doc = new PDFDocument;
-// var fontkit = require('fontkit');
+   fs.writeFile(fileloc, JSON.stringify(json), function (err) {
+    if (err) throw err;
+    console.log("json created");
+})
+const doc = new PDFDocument;
+var fontkit = require('fontkit');
 
-// doc.pipe(fs.createWriteStream('./reports/output.pdf'));
+doc.pipe(fs.createWriteStream('./reports/'+name+" Report.pdf"));
 
-// doc.font('fonts/PalatinoBold.ttf')
-//    .fontSize(25)
-//    .text(name + " Report", 100, 100);
+doc.image('./Picture2.jpg', 50 , 0, {
+    fit: [150, 150],
+    align: 'center',
+    valign: 'center',
+ });
 
-//    doc.font('fonts/PalatinoBold.ttf')
-//    .fontSize(15)
-//    .text('Scan Date: ', 100, 160);
 
-//    doc.font('fonts/PalatinoBold.ttf')
-//    .fontSize(15)
-//    .text('Number of Threat Words Found: ' + definite.length , 100, 200);
+doc.font('fonts/PalatinoBold.ttf')
+   .fontSize(25)
+   .text(name + " Report", 100, 100);
 
-//    doc.font('fonts/PalatinoBold.ttf')
-//    .fontSize(15)
-//    .text('Exact Matches: ' + JSON.stringify(definite) , 100, 240);
+   doc.font('fonts/PalatinoBold.ttf')
+   .fontSize(15)
+   .text('Scan Date: ' + now , 100, 160);
 
-//    doc.font('fonts/PalatinoBold.ttf')
-//    .fontSize(15)
-//    .text('Partial Matches: ' + JSON.stringify(maybe) , 100, 280);
+   doc.font('fonts/PalatinoBold.ttf')
+   .fontSize(15)
+   .text('Number of Threat Words Found: ' + definite.length , 100, 200);
+
+   doc.font('fonts/PalatinoBold.ttf')
+   .fontSize(15)
+   .text('Exact Matches: ' + JSON.stringify(definite) , 100, 240);
+
+   doc.font('fonts/PalatinoBold.ttf')
+   .fontSize(15)
+   .text('Partial Matches: ' + JSON.stringify(maybe) , 100, 280);
 
     
 
-//    doc.end();
+   doc.end();
 }
 
 

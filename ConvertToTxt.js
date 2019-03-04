@@ -32,7 +32,10 @@ watch(folder, { recursive: true }, function (evt, name) {
 
         if (name.endsWith(".pdf")) {
             pfdToTxt(name, txtfile);
-            fs.unlinkSync(name);
+            if (!fs.existsSync(name)){
+                fs.unlinkSync(name);
+            }
+            
         }
 
         if (name.endsWith(".xlsx")) {

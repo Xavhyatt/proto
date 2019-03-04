@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www, node ConvertToTxt.js, node scantext.js",
+    "trial": "node ConvertToTxt.js | node scantext.js"
   },
   "dependencies": {
     "connect-busboy": "0.0.2",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
+    "date-and-time": "^0.6.3",
     "debug": "~2.6.9",
     "docx": "^4.7.1",
     "express": "~4.16.0",
